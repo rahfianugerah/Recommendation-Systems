@@ -8,6 +8,9 @@
 # %% [markdown]
 # ## Import Library
 
+# %% [markdown]
+# Importing all required library for this project
+
 # %%
 import pandas as pd
 import numpy as np
@@ -17,6 +20,7 @@ import re
 import zipfile
 
 from sklearn.feature_extraction.text import TfidfVectorizer
+from wordcloud import WordCloud
 from sklearn.metrics.pairwise import cosine_similarity
 
 # %% [markdown]
@@ -24,6 +28,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # %% [markdown]
 # ### Download Dataset
+
+# %% [markdown]
+# Download dataset using kaggle
 
 # %%
 !kaggle datasets download -d ruchi798/bookcrossing-dataset
@@ -41,6 +48,9 @@ zip.close() # close zip file
 # %% [markdown]
 # ### Data Loading
 
+# %% [markdown]
+# Load the dataset
+
 # %%
 df = pd.read_csv("Books Data with Category Language and Summary\Preprocessed_data.csv")
 df.head(len(df))
@@ -48,8 +58,14 @@ df.head(len(df))
 # %% [markdown]
 # ## Data Assesing
 
+# %% [markdown]
+# Checking information about the dataset
+
 # %%
 df.info()
+
+# %% [markdown]
+# Assesing the dataset
 
 # %%
 # Function for assesing data
@@ -66,12 +82,21 @@ data_assesing(df)
 # %% [markdown]
 # ## Data Cleaning
 
+# %% [markdown]
+# Discard records that have a not available value
+
 # %%
 df = pd.DataFrame(df.dropna())
 df.head(len(df))
 
+# %% [markdown]
+# The dataset has been cleaned
+
 # %%
 data_assesing(df)
+
+# %% [markdown]
+# Discard another unused columns
 
 # %%
 df = pd.DataFrame(df.drop(columns=['img_s', 'img_l', 'img_m', 'Unnamed: 0', 'user_id']))
@@ -81,6 +106,9 @@ df.head()
 
 # %% [markdown]
 # ## Exploratory Data Analysis
+
+# %% [markdown]
+# This code below will create the visualization for rating distribution
 
 # %%
 # Calculate the count of each rating value
@@ -105,6 +133,12 @@ plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add grid lines with trans
 plt.show()
 
 
+# %% [markdown]
+# From the results of the visualization above, it can be concluded that the most books are books that have a rating of 0. Most likely this book has not been read by many people and is not popular among readers.
+
+# %% [markdown]
+# This code below will create the visualization for cleaned rating distribution
+
 # %%
 # Filter out rows where rating is 0
 data_rating = df[df['rating'] != 0]
@@ -127,8 +161,14 @@ plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add grid lines with trans
 plt.tight_layout()
 plt.show()
 
+# %% [markdown]
+# By removing the 0 rating, The most read book is a book with a rating of 8. It is likely that this book is very popular but does not have as high a rating as a book with a rating of 10.
+
+# %% [markdown]
+# Below is the code that can visualize the top 10 most readed books
+
 # %%
-# Count occurrences of each book and select top 10
+# Count occurrences of each book and select top 10 most readed books
 data_authors = df['book_title'].value_counts().head(10).reset_index()
 data_authors.columns = ['book_title', 'count']
 
@@ -139,7 +179,7 @@ sns.barplot(x='count', y='book_title', data=data_authors, color='skyblue')
 # Customizing labels and title
 plt.xlabel('Count', size=10)
 plt.ylabel('Author', size=10)
-plt.title('Top 10 Books', size=10)
+plt.title('Top 10 Most Readed Books', size=10)
 
 # Adjusting tick label size for better readability
 plt.xticks(size=10)
@@ -149,6 +189,12 @@ plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add grid lines with trans
 
 # Displaying the plot
 plt.show()
+
+# %% [markdown]
+# From the visualization above, can be concluded that book with the tile of 'Wild Animus' is the most popular book with more than 2000 readers
+
+# %% [markdown]
+# Below is the code to show top 10 years of publication
 
 # %%
 # Count occurrences of each year and select top 10
@@ -174,6 +220,12 @@ plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add grid lines with trans
 # Displaying the plot
 plt.show()
 
+# %% [markdown]
+# Can concluded, The year when the most books were released was 2002, with more than 80000 books.
+
+# %% [markdown]
+# This code below with visualize top 10 best-selling author
+
 # %%
 # Count occurrences of each book author and select top 10
 data_authors = df['book_author'].value_counts().head(10).reset_index()
@@ -196,6 +248,12 @@ plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add grid lines with trans
 
 # Displaying the plot
 plt.show()
+
+# %% [markdown]
+# It can be concluded that stephen king is the best-selling author in a certain period. Most likely the book he wrote has the most interesting story among other authors.
+
+# %% [markdown]
+# Below is the code to visualize the top 10 book publishers.
 
 # %%
 # Count occurrences of each book publisher and select top 10
@@ -221,26 +279,52 @@ plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add grid lines with trans
 plt.show()
 
 # %% [markdown]
+# It can be concluded that Ballentine Books was the largest publisher of books in its time, meaning that this publisher had a major contribution to the book industry in its time.
+
+# %% [markdown]
 # ## Data Preparation
+
+# %% [markdown]
+# The following is a dataset that has gone through the data cleaning stage
 
 # %%
 df.head(len(df))
 
+# %% [markdown]
+# ### Removing Unnecessary Features
+# Discarding some unused feature columns
+
 # %%
 # Drop unnecessary columns and duplicates
-cleaned_df = df.drop(columns=['location', 'age', 'year_of_publication', 'Summary', 'Language', 'city', 'state', 'country'])
+cleaned_df = df.drop(columns=['location', 'age', 'year_of_publication', 'publisher', 'Language', 'city', 'state', 'country'])
 cleaned_df = cleaned_df.drop_duplicates(subset=['book_title'])
 
+# %% [markdown]
+# ### Reduce Categories
+
+# %% [markdown]
+# Filtering categories that have less than 50 and more than 2000 books to save computation time.
+
+# %%
 # Calculate category counts
 category_counts = cleaned_df['Category'].value_counts()
 
 # Filter categories based on count for shorten computing time
-unused_cat = category_counts[(category_counts < 100) | (category_counts > 1000)].index.tolist()
+unused_cat = category_counts[(category_counts < 50) | (category_counts > 2000)].index.tolist()
+
+# %% [markdown]
+# Removes books that have a rating of 0 in the dataset.
 
 # %%
 dfbooks = cleaned_df.loc[~cleaned_df['Category'].isin(unused_cat)]
 dfbooks = dfbooks[dfbooks['rating'] != 0]
 dfbooks.head(len(dfbooks))
+
+# %% [markdown]
+# ### Clean up the Category Feature
+
+# %% [markdown]
+# This code below will clean the categories feature by removing the symbols and special characters.
 
 # %%
 def clean_category(text):
@@ -249,41 +333,76 @@ def clean_category(text):
     return text.strip()  # Strip whitespace from both ends of the cleaned text
 
 # Apply the clean_category function to the 'Category' column
-dfbooks['clean_category'] = dfbooks['Category'].apply(clean_category)
+dfbooks['category'] = dfbooks['Category'].apply(clean_category)
 
 # Sort unique categories alphabetically
-clean_cat_sort = np.sort(dfbooks['clean_category'].unique())
+clean_cat_sort = np.sort(dfbooks['category'].unique())
 
 # Print sorted categories
 for cat in clean_cat_sort:
     print(cat)
 
+# %% [markdown]
+# Drop the 'Category' column
+
 # %%
 clean_data = dfbooks.drop(['Category'], axis=1)
 clean_data.head()
 
+# %%
+clean_data.shape
+
 # %% [markdown]
 # ## Modeling Section
+# 
+# For modeling, content-based filtering and cosine similarity are used to find similarities between books.
+
+# %% [markdown]
+# ## Content Based Filtering
+# Content Based Filtering is done by creating an algorithm to find out recommendations based on the user's _history_.
 
 # %% [markdown]
 # ### TF-IDF Vectorizer
 
+# %% [markdown]
+# Used `Tfidfvectorizer` to perform _idf_ calculation on `clean_category` and perform array mapping.
+
 # %%
 # Initialize TfidfVectorizer
 tf = TfidfVectorizer()
+tf.fit(clean_data['category'])
+tf.get_feature_names_out()
 
+# %%
 # Fit and transform 'clean_category' to TF-IDF matrix
-tfidf_matrix = tf.fit_transform(clean_data['clean_category'])
+tfidf_matrix = tf.fit_transform(clean_data['category'])
+tfidf_matrix.shape
 
-# Calculate cosine similarity
-cosine_sim = cosine_similarity(tfidf_matrix)
+# %% [markdown]
+# The result of the previously created matrix can be seen with `todense()`
+
+# %%
+tfidf_matrix.todense()
+
+# %%
+show_books_category = pd.DataFrame(
+    tfidf_matrix.todense(), 
+    columns=tf.get_feature_names_out(),
+    index=clean_data.book_title
+).sample(20, axis=1).sample(10, axis=0)
+
+show_books_category
 
 # %% [markdown]
 # ### Cosine Similarity
 
 # %%
+# Calculate cosine similarity
+cosine_sim = cosine_similarity(tfidf_matrix)
+
 # Create DataFrame with cosine similarity matrix
 cosine_sim_df = pd.DataFrame(cosine_sim, index=clean_data['book_title'], columns=clean_data['book_title'])
+print(f"Shape: {cosine_sim_df.shape}") 
 
 # Display a sample subset of the similarity matrix
 sample_titles = cosine_sim_df.sample(5, axis=1).sample(10, axis=0)  # Sample 5 columns and 10 rows
@@ -291,61 +410,40 @@ sample_titles
 
 # %% [markdown]
 # ## Recommendation Testing
+# This section will try to recommend some books
 
 # %%
-def get_recommendations(book_title):
-    # Get the index of the book_title in cosine_sim_df
-    index = cosine_sim_df.index.get_loc(book_title)
+def book_recommendations(books, similarity_data=cosine_sim_df, items=clean_data[['book_title', 'rating', 'book_author', 'category']], k=10):
+    # Convert the similarity data to a numpy array
+    similarity_array = similarity_data.loc[:, books].to_numpy()
 
-    # Get k most similar books (excluding the book_title itself)
-    k = 10
-    closest_indices = np.argsort(cosine_sim_df.iloc[index].values)[-2:-(2 + k):-1]
-    closest_books = cosine_sim_df.columns[closest_indices]
+    # Get the indices of the k most similar books
+    index = similarity_array.argpartition(range(-1, -k, -1))
+    
+    # Get the book titles and their corresponding similarity scores
+    closest_indices = index[-1:-(k+2):-1]
+    closest_books = similarity_data.columns[closest_indices]
+    closest_scores = similarity_array[closest_indices]
 
-    # Filter items DataFrame to include only recommended books with rating > 5
-    recommended_books = clean_data[(clean_data['book_title'].isin(closest_books)) & (clean_data['rating'] >= 5)]
+    # Create a DataFrame with the closest books and their similarity scores
+    recommendations = pd.DataFrame({
+        'book_title': closest_books,
+        'similarity_score': closest_scores
+    })
 
-    return recommended_books.sort_values(by='rating', ascending=False).head(k)
+    # Drop the queried book from the recommendations
+    recommendations = recommendations[recommendations['book_title'] != books]
 
-# Example usage:
-books = 'Die Korrekturen.'
-recommended_books = get_recommendations(books)
-recommended_books.sort_values(['rating'], ascending=True)
-pd.DataFrame(recommended_books)
-
-# %% [markdown]
-# ## Evaluation
-
-# %% [markdown]
-# ### Precision
+    # Merge with the items DataFrame to get additional information
+    recommendations = recommendations.merge(items, on='book_title').head(k)
+    
+    return recommendations
 
 # %%
-def precision_at_k(recommended_books, ground_truth_books):
-    """
-    Calculate the precision at k for the recommended books.
-    
-    Parameters:
-    - recommended_books: DataFrame, books recommended by the system
-    - ground_truth_books: DataFrame, ground truth relevant books
-    
-    Returns:
-    - float, precision at k
-    """
-    # Calculate the number of relevant items in the recommended books
-    relevant_items = recommended_books[recommended_books['book_title'].isin(ground_truth_books['book_title'])]
+book = "Why We Love Dogs: A Bark & Smile Book"
+clean_data[clean_data.book_title.eq(book)]
 
-    # Precision is the number of relevant items retrieved divided by the number of items retrieved
-    precision = len(relevant_items) / len(recommended_books) if len(recommended_books) > 0 else 0
-    return precision
-
-# Define a threshold
-threshold = 5
-
-# Define a ground truth DataFrame for evaluation
-ground_truth_books = clean_data[clean_data['rating'] >= threshold]
-
-# Calculate precision at k
-precision = precision_at_k(recommended_books, ground_truth_books)
-print(f"Precision at K: {precision:.2f}")
+# %%
+book_recommendations(book)
 
 
