@@ -8,3 +8,8 @@
 
   </p>
 </div>
+
+## Project Overview
+<p align="justify">
+This repository focuses on the development of a recommendation system using content-based filtering and collaborative filtering. The goal is to create a system that can provide personalized suggestions to users by leveraging data on user preferences, behaviors, and item characteristics. Content-based filtering analyzes the attributes of items and users to make recommendations, while collaborative filtering relies on user interactions and similarities between users or items.
+</p>
